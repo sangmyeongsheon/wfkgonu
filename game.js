@@ -212,11 +212,13 @@ function showScreen(screenName) {
 }
 
 function showModal(modalName) {
+    modals[modalName].classList.remove('hidden');  // hidden 클래스 제거 먼저!
     modals[modalName].classList.add('active');
 }
 
 function hideModal(modalName) {
     modals[modalName].classList.remove('active');
+    modals[modalName].classList.add('hidden');  // hidden 클래스 다시 추가
 }
 
 function resetGame() {
