@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoNu Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main Header -->
+        <header class="game-header">
+            <h1>🎯 GoNu Game</h1>
+            <button class="rules-btn" id="rulesBtn">Game Rules</button>
+        </header>
+
+        <!-- Game Content -->
+        <div class="game-content">
+            <!-- Mode Selection Screen -->
+            <div id="modeSelection" class="screen active">
+                <h2>Select Game Mode</h2>
+                <div class="button-group">
+                    <button class="mode-btn" id="singlePlayerBtn">
+                        🤖 1 Player<br><span>vs AI</span>
+                    </button>
+                    <button class="mode-btn" id="twoPlayerBtn">
+                        👥 2 Players<br><span>vs Friend</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Player Choice Screen -->
+            <div id="playerChoice" class="screen">
+                <h2>Choose Turn Order</h2>
+                <div class="button-group">
+                    <button class="choice-btn blue" id="firstPlayerBtn">
+                        🔵 First<br><span>Start first with blue</span>
+                    </button>
+                    <button class="choice-btn red" id="secondPlayerBtn">
+                        🔴 Second<br><span>Start second with red</span>
+                    </button>
+                </div>
+                <button class="back-btn" id="backToModeBtn">← Back to Mode Selection</button>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" class="screen">
+                <div class="game-info">
+                    <div class="current-turn">
+                        <span id="turnIndicator">🔵 Blue's Turn</span>
+                    </div>
+                    <div class="game-controls">
+                        <button class="control-btn" id="restartBtn">🔄 Restart</button>
+                        <button class="control-btn" id="backToMenuBtn">📋 Menu</button>
+                    </div>
+                </div>
+
+                <!-- Game Board Canvas -->
+                <div class="game-board">
+                    <canvas id="gameCanvas" width="600" height="600"></canvas>
+                </div>
+
+                <!-- AI Status -->
+                <div id="aiStatus" class="ai-status hidden">🤔 AI is thinking...</div>
+
+                <!-- Game Result -->
+                <div id="gameResult" class="game-result hidden">
+                    <div class="result-content">
+                        <h2 id="resultText">Result</h2>
+                        <div class="result-buttons">
+                            <button class="result-btn" id="playAgainBtn">Play Again</button>
+                            <button class="result-btn secondary" id="menuBtn">Menu</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules Modal -->
+        <div id="rulesModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🎯 GoNu Game Rules</h2>
+                    <button class="close-btn" id="closeRulesBtn">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="rule-section">
+                        <h3>🎮 Game Objective</h3>
+                        <p>The goal is to make it impossible for your opponent to move any of their pieces.</p>
+                    </div>
+
+                    <div class="rule-section">
+                        <h3>⚙️ Game Setup</h3>
+                        <ul>
+                            <li>Each player has 3 pieces</li>
+                            <li>Blue pieces are placed at the top, red pieces at the bottom</li>
+                            <li>Blue always goes first</li>
+                        </ul>
+                    </div>
+
+                    <div class="rule-section">
+                        <h3>🚀 Movement Rules</h3>
+                        <ul>
+                            <li>Pieces can only move along connected lines</li>
+                            <li>Only one space per move</li>
+                            <li>Cannot move to a space occupied by another piece</li>
+                            <li>Diagonal moves are only allowed within the circle</li>
+                            <li><strong>Cannot retreat backwards within your own home area</strong></li>
+                        </ul>
+                    </div>
+
+                    <div class="rule-section">
+                        <h3>🏆 Victory Conditions</h3>
+                        <ul>
+                            <li>Win when your opponent cannot make any moves</li>
+                            <li>Lose when all your pieces are blocked or have no valid moves</li>
+                        </ul>
+                    </div>
+
+                    <div class="rule-section">
+                        <h3>🤖 AI Mode</h3>
+                        <p>The AI uses optimal strategy, calculating 6 moves ahead to choose the best possible move.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html> 

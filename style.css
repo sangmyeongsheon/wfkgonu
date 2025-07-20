@@ -1,0 +1,543 @@
+/* 기본 스타일 및 리셋 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+    text-align: center;
+}
+
+/* 헤더 스타일 */
+.game-header {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-header h1 {
+    font-size: 2.5em;
+    color: #4a5568;
+    margin: 0;
+}
+
+.rules-btn {
+    background: #4299e1;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+
+.rules-btn:hover {
+    background: #3182ce;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+/* 화면 전환 */
+.game-content {
+    position: relative;
+}
+
+.screen {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.screen.active {
+    display: block;
+}
+
+.screen h2 {
+    font-size: 2em;
+    color: #2d3748;
+    margin-bottom: 30px;
+}
+
+/* 버튼 그룹 */
+.button-group {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* 모드 선택 버튼 */
+.mode-btn {
+    background: linear-gradient(145deg, #f7fafc, #edf2f7);
+    border: 2px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 30px 40px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #2d3748;
+    min-width: 200px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mode-btn:hover {
+    background: linear-gradient(145deg, #e2e8f0, #cbd5e0);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #4299e1;
+}
+
+.mode-btn span {
+    display: block;
+    font-size: 0.8em;
+    color: #718096;
+    margin-top: 5px;
+    font-weight: normal;
+}
+
+/* 선공/후공 선택 버튼 */
+.choice-btn {
+    background: linear-gradient(145deg, #f7fafc, #edf2f7);
+    border: 2px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 25px 35px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #2d3748;
+    min-width: 180px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.choice-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.choice-btn.blue:hover {
+    background: linear-gradient(145deg, #bee3f8, #90cdf4);
+    border-color: #3182ce;
+}
+
+.choice-btn.red:hover {
+    background: linear-gradient(145deg, #fed7d7, #fc8181);
+    border-color: #e53e3e;
+}
+
+.choice-btn span {
+    display: block;
+    font-size: 0.8em;
+    color: #718096;
+    margin-top: 5px;
+    font-weight: normal;
+}
+
+/* 뒤로가기 버튼 */
+.back-btn {
+    background: #718096;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 30px;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: #4a5568;
+    transform: translateY(-2px);
+}
+
+/* 게임 화면 */
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.current-turn {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.game-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    background: #4299e1;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+    background: #3182ce;
+    transform: translateY(-2px);
+}
+
+/* 게임 보드 */
+.game-board {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+#gameCanvas {
+    border: 3px solid #2d3748;
+    border-radius: 15px;
+    background: #f7fafc;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    max-width: 100%;
+    height: auto;
+}
+
+/* AI 상태 */
+.ai-status {
+    font-size: 1.2em;
+    color: #4a5568;
+    font-weight: bold;
+    margin: 15px 0;
+    padding: 10px 20px;
+    background: #fef5e7;
+    border: 2px solid #f6ad55;
+    border-radius: 25px;
+    animation: pulse 2s infinite;
+}
+
+.ai-status.hidden {
+    display: none;
+}
+
+/* 게임 결과 */
+.game-result {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.game-result.hidden {
+    display: none;
+}
+
+.result-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.5s ease-out;
+}
+
+.result-content h2 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+    color: #2d3748;
+}
+
+.result-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.result-btn {
+    background: #4299e1;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+}
+
+.result-btn:hover {
+    background: #3182ce;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+}
+
+.result-btn.secondary {
+    background: #718096;
+    box-shadow: 0 4px 15px rgba(113, 128, 150, 0.3);
+}
+
+.result-btn.secondary:hover {
+    background: #4a5568;
+    box-shadow: 0 6px 20px rgba(113, 128, 150, 0.4);
+}
+
+/* 모달 스타일 */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.5s ease-out;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 30px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1.8em;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: #718096;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: #f7fafc;
+    color: #2d3748;
+}
+
+.modal-body {
+    padding: 30px;
+    text-align: left;
+}
+
+.rule-section {
+    margin-bottom: 25px;
+}
+
+.rule-section h3 {
+    color: #2d3748;
+    font-size: 1.3em;
+    margin-bottom: 10px;
+}
+
+.rule-section p {
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.rule-section ul {
+    color: #4a5568;
+    line-height: 1.6;
+    padding-left: 20px;
+}
+
+.rule-section li {
+    margin-bottom: 5px;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .game-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .game-header h1 {
+        font-size: 2em;
+    }
+    
+    .screen {
+        padding: 20px;
+    }
+    
+    .button-group {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .mode-btn, .choice-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .game-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    #gameCanvas {
+        width: 100%;
+        max-width: 400px;
+    }
+    
+    .result-content {
+        padding: 25px;
+        width: 95%;
+    }
+    
+    .result-content h2 {
+        font-size: 2em;
+    }
+    
+    .result-buttons {
+        flex-direction: column;
+    }
+    
+    .result-btn {
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-header {
+        padding: 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-header h1 {
+        font-size: 1.8em;
+    }
+    
+    .screen h2 {
+        font-size: 1.5em;
+    }
+    
+    .mode-btn, .choice-btn {
+        padding: 20px 25px;
+        font-size: 1em;
+    }
+    
+    #gameCanvas {
+        max-width: 350px;
+    }
+}
+
+/* 숨김 클래스 */
+.hidden {
+    display: none !important;
+} 
