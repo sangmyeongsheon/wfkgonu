@@ -50,7 +50,10 @@ let gameState = {
     turn: 1, // 1: 파란색, 2: 빨간색
     gameOver: false,
     isAiThinking: false,
-    aiMoveTimeout: null
+    aiMoveTimeout: null,
+    turnCount: 0, // 턴 수 카운트 (통계용)
+    moveHistory: [], // 이동 기록 (무한루프 방지)
+    maxHistorySize: 10 // 최근 이동 기록 개수
 };
 
 // DOM 요소들
@@ -228,6 +231,8 @@ function resetGame() {
     gameState.turn = 1;
     gameState.gameOver = false;
     gameState.isAiThinking = false;
+    gameState.turnCount = 0;
+    gameState.moveHistory = [];
     
     if (gameState.aiMoveTimeout) {
         clearTimeout(gameState.aiMoveTimeout);
@@ -359,11 +364,15 @@ function handleCanvasClick(event) {
     if (gameState.selected && isValidMove(gameState.selected, closestNode)) {
         movePiece(gameState.selected, closestNode, gameState.turn);
         gameState.selected = null;
+        gameState.turnCount++;
+        addMoveToHistory();
         
         const nextTurn = gameState.turn === 1 ? 2 : 1;
+        
+        // 게임 오버 체크
         if (checkGameOver(nextTurn)) {
             gameState.gameOver = true;
-            showGameResult(gameState.turn);
+            showGameResult(gameState.turn); // 현재 플레이어가 승리
         } else {
             gameState.turn = nextTurn;
             updateTurnIndicator();
@@ -419,16 +428,115 @@ function getAllPossibleMoves(player) {
 }
 
 function checkGameOver(player) {
+    // 이동할 수 없으면 게임 오버 (고누 게임의 유일한 승부 조건)
     return getAllPossibleMoves(player).length === 0;
+}
+
+// 게임 상태를 문자열로 변환 (이동 기록용)
+function getGameStateString() {
+    const p1 = gameState.player1.map(p => `${p[0]},${p[1]}`).sort().join(';');
+    const p2 = gameState.player2.map(p => `${p[0]},${p[1]}`).sort().join(';');
+    return `${p1}|${p2}`;
+}
+
+// 이동 기록 추가
+function addMoveToHistory() {
+    const stateString = getGameStateString();
+    gameState.moveHistory.push(stateString);
+    
+    // 최대 기록 수 초과시 오래된 것 제거
+    if (gameState.moveHistory.length > gameState.maxHistorySize) {
+        gameState.moveHistory.shift();
+    }
+}
+
+// 무한루프 감지 (같은 상태가 3번 이상 나타나면 무한루프로 판단)
+function detectInfiniteLoop() {
+    if (gameState.moveHistory.length < 6) return false;
+    
+    const currentState = getGameStateString();
+    let count = 0;
+    
+    for (const state of gameState.moveHistory) {
+        if (state === currentState) {
+            count++;
+        }
+    }
+    
+    return count >= 3;
+}
+
+// 특정 이동이 반복 패턴을 만드는지 체크
+function wouldCauseLoop(start, end, player) {
+    // 임시로 이동해서 새로운 게임 상태 생성
+    const pieces = player === 1 ? gameState.player1 : gameState.player2;
+    const index = pieces.findIndex(([px, py]) => px === start[0] && py === start[1]);
+    const originalPos = pieces[index];
+    pieces[index] = end;
+    
+    // 새로운 상태 문자열 생성
+    const newState = getGameStateString();
+    
+    // 이동 복구
+    pieces[index] = originalPos;
+    
+    // 이 상태가 이전에 몇 번 나타났는지 확인
+    let count = 0;
+    for (const state of gameState.moveHistory) {
+        if (state === newState) {
+            count++;
+        }
+    }
+    
+    return count >= 2; // 2번 이상 나타났다면 3번째가 되므로 반복으로 판단
+}
+
+// AI를 위한 향상된 이동 평가 (반복 방지 포함)
+function getEnhancedMoveScore(start, end, aiPlayer) {
+    // 기본 미니맥스 점수 계산
+    const pieces = aiPlayer === 1 ? gameState.player1 : gameState.player2;
+    const index = pieces.findIndex(([px, py]) => px === start[0] && py === start[1]);
+    const originalPos = pieces[index];
+    pieces[index] = end;
+    
+    const nextTurn = aiPlayer === 1 ? 2 : 1;
+    const baseScore = minimax(4, aiPlayer, -Infinity, Infinity, nextTurn);
+    
+    // 이동 복구
+    pieces[index] = originalPos;
+    
+    let finalScore = baseScore;
+    
+    // 반복 패턴 페널티
+    if (wouldCauseLoop(start, end, aiPlayer)) {
+        finalScore -= 200; // 큰 페널티 부여
+    }
+    
+    // 다양성 보너스 - 최근에 사용하지 않은 이동에 보너스
+    const moveString = `${start[0]},${start[1]}->${end[0]},${end[1]}`;
+    const recentMoves = gameState.moveHistory.slice(-6); // 최근 6개 상태
+    let diversityBonus = 10;
+    
+    recentMoves.forEach(state => {
+        if (state.includes(moveString)) {
+            diversityBonus -= 2;
+        }
+    });
+    
+    finalScore += Math.max(0, diversityBonus);
+    
+    return finalScore;
 }
 
 function updateTurnIndicator() {
     const turnIndicator = document.getElementById('turnIndicator');
+    const turnInfo = ` (Turn ${Math.ceil(gameState.turnCount / 2)})`;
+    
     if (gameState.turn === 1) {
-        turnIndicator.textContent = '🔵 Blue\'s Turn';
+        turnIndicator.textContent = '🔵 Blue\'s Turn' + turnInfo;
         turnIndicator.style.color = COLORS.BLUE;
     } else {
-        turnIndicator.textContent = '🔴 Red\'s Turn';
+        turnIndicator.textContent = '🔴 Red\'s Turn' + turnInfo;
         turnIndicator.style.color = COLORS.RED;
     }
 }
@@ -482,11 +590,15 @@ function executeAiMove() {
     if (bestMove) {
         movePiece(bestMove[0], bestMove[1], aiPlayer);
         gameState.turn = aiPlayer;
+        gameState.turnCount++;
+        addMoveToHistory();
         
         const nextTurn = aiPlayer === 1 ? 2 : 1;
+        
+        // 게임 오버 체크
         if (checkGameOver(nextTurn)) {
             gameState.gameOver = true;
-            showGameResult(aiPlayer);
+            showGameResult(aiPlayer); // AI가 승리
         } else {
             gameState.turn = nextTurn;
             updateTurnIndicator();
@@ -501,27 +613,37 @@ function executeAiMove() {
 function getBestAiMove(aiPlayer) {
     let bestMove = null;
     let bestScore = -Infinity;
-    
     const possibleMoves = getAllPossibleMoves(aiPlayer);
     
+    // 모든 이동이 반복을 야기하는지 체크
+    let hasNonLoopingMoves = false;
+    const moveScores = [];
+    
     possibleMoves.forEach(([start, end]) => {
-        // 임시로 이동
-        const pieces = aiPlayer === 1 ? gameState.player1 : gameState.player2;
-        const index = pieces.findIndex(([px, py]) => px === start[0] && py === start[1]);
-        const originalPos = pieces[index];
-        pieces[index] = end;
+        const score = getEnhancedMoveScore(start, end, aiPlayer);
+        moveScores.push({ move: [start, end], score: score });
         
-        const nextTurn = aiPlayer === 1 ? 2 : 1;
-        const score = minimax(6, aiPlayer, -Infinity, Infinity, nextTurn);
-        
-        // 이동 복구
-        pieces[index] = originalPos;
-        
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = [start, end];
+        // 반복을 야기하지 않는 이동이 있는지 체크
+        if (!wouldCauseLoop(start, end, aiPlayer)) {
+            hasNonLoopingMoves = true;
         }
     });
+    
+    // 점수 기준으로 정렬 (높은 점수부터)
+    moveScores.sort((a, b) => b.score - a.score);
+    
+    // 만약 모든 이동이 반복을 야기한다면, 차선책으로 무작위성 추가
+    if (!hasNonLoopingMoves && moveScores.length > 1) {
+        console.log("AI detected infinite loop pattern, using alternative strategy");
+        // 상위 2-3개 중에서 무작위 선택하여 예측 불가능성 추가
+        const topMoves = moveScores.slice(0, Math.min(3, moveScores.length));
+        const randomIndex = Math.floor(Math.random() * topMoves.length);
+        bestMove = topMoves[randomIndex].move;
+        console.log(`AI chose alternative move: ${bestMove[0]} -> ${bestMove[1]}`);
+    } else {
+        // 가장 좋은 점수의 이동 선택
+        bestMove = moveScores[0].move;
+    }
     
     return bestMove;
 }
@@ -582,20 +704,69 @@ function minimax(depth, maximizingPlayer, alpha, beta, currentTurn) {
 
 function evaluateBoard(maximizingPlayer) {
     // 게임이 끝났는지 체크
-    if (checkGameOver(1)) {
+    if (getAllPossibleMoves(1).length === 0) {
         return maximizingPlayer === 1 ? -1000 : 1000;
     }
-    if (checkGameOver(2)) {
+    if (getAllPossibleMoves(2).length === 0) {
         return maximizingPlayer === 1 ? 1000 : -1000;
     }
     
-    // 이동 가능한 수의 개수로 평가
+    // 게임이 너무 길어지면 약간 부정적으로 평가 (150턴 이상)
+    if (gameState.turnCount >= 150) {
+        return -10; // 약한 페널티만 부여
+    }
+    
+    let score = 0;
+    
+    // 이동 가능한 수의 개수로 기본 평가
     const player1Moves = getAllPossibleMoves(1).length;
     const player2Moves = getAllPossibleMoves(2).length;
     
     if (maximizingPlayer === 1) {
-        return player1Moves - player2Moves;
+        score += (player1Moves - player2Moves) * 10;
     } else {
-        return player2Moves - player1Moves;
+        score += (player2Moves - player1Moves) * 10;
     }
+    
+    // 중앙 제어 보너스 (더 공격적인 플레이 유도)
+    const centerBonus = getCenterControlBonus(maximizingPlayer);
+    score += centerBonus;
+    
+    // 적극적인 플레이 보너스 (상대방 집 근처로 이동 장려)
+    const aggressiveBonus = getAggressiveBonus(maximizingPlayer);
+    score += aggressiveBonus;
+    
+    return score;
+}
+
+// 중앙 제어 보너스 계산
+function getCenterControlBonus(player) {
+    const pieces = player === 1 ? gameState.player1 : gameState.player2;
+    let bonus = 0;
+    
+    pieces.forEach(([x, y]) => {
+        // 중앙 원 주변 (300,300 중심)의 위치에 보너스
+        if (x === 300 && (y === 200 || y === 400)) bonus += 5;
+        if (y === 300 && (x === 200 || x === 400)) bonus += 5;
+        if (x === 300 && y === 300) bonus += 10; // 정중앙 최고 보너스
+    });
+    
+    return bonus;
+}
+
+// 공격적 플레이 보너스 계산
+function getAggressiveBonus(player) {
+    const pieces = player === 1 ? gameState.player1 : gameState.player2;
+    const opponentPieces = player === 1 ? gameState.player2 : gameState.player1;
+    let bonus = 0;
+    
+    pieces.forEach(([x, y]) => {
+        opponentPieces.forEach(([ox, oy]) => {
+            const distance = Math.abs(x - ox) + Math.abs(y - oy);
+            // 상대방과 가까울수록 보너스 (공격적 플레이 장려)
+            if (distance <= 200) bonus += (200 - distance) / 20;
+        });
+    });
+    
+    return bonus;
 } 
